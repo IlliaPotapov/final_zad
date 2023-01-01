@@ -5,18 +5,19 @@
     <meta name="viewport" 
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <script src="script.js"></script>
+    <script src="music-script.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.cdnfonts.com/css/star-wars" rel="stylesheet">
 </head>
 
 
-<body onload="checkBackground();">
+<body onload="checkBackground();CheckMusic();">
     <div class="container">
         <div class="menu">
             <a class="link" href="menu.html">Menu</a>
             <a class="link" href="background.html">Select background</a>
             <div class="checkbox-div">
-                <input type="checkbox" id="music" name="scales">
+                <input type="checkbox" id="music" name="scales" onchange="SetMusic(this)">
                 <label for="scales" id="checkbox">Music</label>
             </div>
             <div class="checkbox-div">

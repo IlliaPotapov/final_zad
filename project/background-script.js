@@ -13,7 +13,8 @@ function changeBackground(element) {
         difficulty: change_user['difficulty'],
         quest1: change_user['quest1'],
         quest2: change_user['quest2'],
-        total: change_user['total']
+        total: change_user['total'],
+        music: change_user['music']
         
     }
     window.localStorage.setItem('user', JSON.stringify(newUser));

@@ -13,9 +13,47 @@ var bossAppearKills = 10;
 var bossWeapon = [];
 var number_difficulty_chosen = 0;
 var myMusic;
+var MyIntreval = 20;
+var game_level = JSON.parse(window.localStorage.getItem('current-level'));
+var music_check = JSON.parse(window.localStorage.getItem('user'));
+var audio = new Audio("main_theme.mp3");
 
 
-
+function CheckMusic(){
+    if (music_check['music'] == true){
+        document.getElementById("music").checked = true;
+    }
+    else{
+        document.getElementById("music").checked = false;
+    }
+}
+function PlayMusic(){
+    
+    //console.log("hm");
+    
+    if (music_check['music'] == true) 
+    {
+        //console.log("yes");
+        audio.src = "main_theme.mp3";
+        audio.play();
+    }
+  
+    else {
+        //console.log("no");
+        audio.src = "";
+        audio.pause();
+    }
+}
+function StopMusic()
+{
+    if (music_check['music'] == false) 
+    {
+        //console.log("yes");
+        audio.src = "";
+        audio.pause();
+    }
+}
+    
 
 function detectMob() {
     const toMatch = [
@@ -50,7 +88,7 @@ function d1() {
 
     number_difficulty_chosen = 0;
 
-    startGame();
+    startGame(number_difficulty_chosen);
 
 
 }
@@ -58,7 +96,7 @@ function d2() {
 
     number_difficulty_chosen = 1;
 
-    startGame();
+    startGame(number_difficulty_chosen);
 
 
 }
@@ -66,21 +104,21 @@ function d3() {
 
     number_difficulty_chosen = 2;
 
-    startGame();
+    startGame(number_difficulty_chosen);
 
 }
 function d4() {
 
     number_difficulty_chosen = 3;
 
-    startGame();
+    startGame(number_difficulty_chosen);
 
 }
 function d5() {
 
     number_difficulty_chosen = 4;
 
-    startGame();
+    startGame(number_difficulty_chosen);
 
 }
 
@@ -114,22 +152,24 @@ function startGyroscopeGame(x) {
             console.log(event.error.name, event.error.message);
         }
     }
-    startGame();
+    startGame(number_difficulty_chosen);
 }
 
 var current_level;
-function startGame() {
+function startGame(current_difficulty) {
     //console.log(number_difficulty_chosen);
-
-
+    game_level['level'] = current_difficulty;
+    localStorage.setItem("current-level", JSON.stringify(game_level))
+    
     //fetchLevels();
     myGameArea.start();
+    PlayMusic();
 
 
     // myMusic = new sound("http://soundfxcenter.com/movies/star-wars/8d82b5_Star_Wars_Main_Theme_Song.mp3");
     // myMusic.play();
 
-
+   
     level = JSON.parse(window.localStorage.getItem('level'));
 
     current_level = level.levels[number_difficulty_chosen];
@@ -139,27 +179,14 @@ function startGame() {
 
     user = JSON.parse(window.localStorage.getItem('user'));
     myBackground = new background(innerWidth - 10, innerHeight - 10, user['background'], 0, 0, "background");
-    myBoss = new boss(250, 250, "images/deathstar.png", innerWidth / 2, 0, "image");
+    myBoss = new boss(200, 200, "images/deathstar.png", innerWidth / 2, 0, "image");
 
     myTotalScore = new info(innerWidth / 10, innerHeight / 12, "text");
     myHpScore = new info(innerWidth / 10, innerHeight / 8, "text");
-
+    myMobilePause = new pauseButton(innerWidth / 10, innerHeight / 6, "text");
+    myMobilePause.text = "Pause";
+ 
 }
-
-// function sound(src) {
-//     this.sound = document.createElement("audio");
-//     this.sound.src = src;
-//     this.sound.setAttribute("preload", "auto");
-//     this.sound.setAttribute("controls", "none");
-//     this.sound.style.display = "none";
-//     document.body.appendChild(this.sound);
-//     this.play = function () {
-//         this.sound.play();
-//     }
-//     this.stop = function () {
-//         this.sound.pause();
-//     }
-// }
 
 
 function info(x, y, type) {
@@ -175,6 +202,55 @@ function info(x, y, type) {
         }
     }
 }
+
+  
+function pauseButton(x, y, type) {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.update = function () {
+        ctx = myGameArea.context;
+        const pauseMenu = new Path2D();
+        if (this.type == "text") {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.819)";
+            if(!detectMob())
+            {
+
+            
+            ctx.fillRect(this.x, this.y-15, this.x, this.y/5);
+            
+            pauseMenu.rect(this.x, this.y-15, this.x, this.y/5);
+            }
+            else{
+                ctx.fillRect(this.x, this.y-15, this.x*3, this.y/5);
+            
+                pauseMenu.rect(this.x, this.y-15, this.x*3, this.y/5);
+            }
+            ctx.font = "bold 16px Star Wars sans-serif";
+            ctx.fillStyle = "#FFE81F";
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.fillStyle = "#ffffff00";
+            ctx.fill(pauseMenu);
+            myGameArea.canvas.addEventListener('touchstart', function (event) {
+                if (ctx.isPointInPath(pauseMenu, event.touches[0].screenX, event.touches[0].screenY)) {
+                    
+                    pause();
+                }
+            });
+            myGameArea.canvas.addEventListener('mousedown', function (event) {
+                if (ctx.isPointInPath(pauseMenu, event.offsetX, event.offsetY)) {
+                    
+                    
+                    pause();
+                }
+            });
+        }
+
+    }
+    
+    
+}
+
 var myGameArea = {
     canvas: document.createElement("canvas"),
     start: function () {
@@ -183,7 +259,7 @@ var myGameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20);
+        this.interval = setInterval(updateGameArea, MyIntreval);
         window.addEventListener('keydown', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
@@ -194,6 +270,8 @@ var myGameArea = {
         window.addEventListener('space', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
         });
+      
+
 
         window.addEventListener('click', function (e) {
             blaster = new blast("https://www.pngarts.com/files/11/Green-Laser-PNG-Image.png", "image", myGamePiece.x, myGamePiece.y - 10);
@@ -201,6 +279,8 @@ var myGameArea = {
             //myGamePiece.update();
             playerBlaster.push(blaster);
         });
+        
+           
         if (!detectMob()) {
             window.onmousedown = function (event) {
 
@@ -210,7 +290,7 @@ var myGameArea = {
                 }
 
                 // move ship under the pointer
-                moveAt(event.pageX, event.pageY);
+                //moveAt(event.pageX, event.pageY);
 
                 function onMouseMove(event) {
                     moveAt(event.pageX, event.pageY);
@@ -233,13 +313,14 @@ var myGameArea = {
         }
 
         //drag
-        if (detectMob && !isGyroscopeGame) {
+        if (detectMob() && !isGyroscopeGame) {
             window.addEventListener('touchmove', function (e) {
                 myGameArea.x = e.touches[0].screenX;
                 myGameArea.y = e.touches[0].screenY;
                 //myGamePiece.newPos();
                 //myGamePiece.update();
-            })
+            });
+            
         }
 
     },
@@ -250,11 +331,11 @@ var myGameArea = {
         clearInterval(this.interval);
     },
     resume: function () {
-        this.interval = setInterval(updateGameArea, 20);
+        this.interval = setInterval(updateGameArea, MyIntreval);
     },
 
     pauseMenu: function () {
-
+        
         this.context.fillStyle = "rgba(0, 0, 0, 0.819)";
         this.context.fillRect(this.canvas.width / 4, this.canvas.height / 4, this.canvas.width / 2, this.canvas.height / 2);
         this.context.fillStyle = "rgba(21, 21, 21, 21.819)";
@@ -262,24 +343,25 @@ var myGameArea = {
         this.context.font = "bold 25px Star Wars sans-serif";
         this.context.fillStyle = "#FFE81F";
 
-        this.context.fillText("Game is paused", ((this.canvas.width / 2) - 80), (this.canvas.height / 3.25));
+        this.context.fillText("Game is paused", ((this.canvas.width / 2) - 85), (this.canvas.height / 3.25));
         this.context.fillStyle = "rgba(0, 0, 0, 0.819)";
         this.context.font = "bold 20px Star Wars sans-serif";
         this.context.fillStyle = "#FFE81F";
         this.context.fillText("Give Up", ((this.canvas.width / 2) - 80), (this.canvas.height / 2.5));
-        this.context.fillText("Back to Menu", ((this.canvas.width / 2) - 80), (this.canvas.height / 2));
-        this.context.fillText("Quests", ((this.canvas.width / 2) - 80), (this.canvas.height / 1.7));
+        this.context.fillText("Menu", ((this.canvas.width / 2) - 80), (this.canvas.height / 2));
+        this.context.fillText("Resume", ((this.canvas.width / 2) - 80), (this.canvas.height / 1.7));
 
         const Menu = new Path2D();
         const GiveUp = new Path2D();
-        //const Quests = new Path2D();
-        Menu.rect(this.canvas.width / 4, this.canvas.height / 2.2, this.canvas.width / 2, this.canvas.height / 12);
-        GiveUp.rect(this.canvas.width / 4, this.canvas.height / 2.8, this.canvas.width / 2, this.canvas.height / 12);
-        //Quests.rect(this.canvas.width / 4, this.canvas.height / 1.8, this.canvas.width / 2, this.canvas.height / 12);
+        const Resume = new Path2D();
+        Menu.rect((this.canvas.width / 2.5) - 30, this.canvas.height / 2.2, this.canvas.width / 7, this.canvas.height / 12);
+        GiveUp.rect((this.canvas.width / 2.5) - 30, this.canvas.height / 2.8, this.canvas.width / 7, this.canvas.height / 12);
+        Resume.rect((this.canvas.width / 2.5) - 30, this.canvas.height / 1.8, this.canvas.width / 7, this.canvas.height / 12);
         this.context.fillStyle = "#ffffff00";
         this.context.fill(Menu);
         this.context.fill(GiveUp);
-        //this.context.fill(Quests);
+        this.context.fill(Resume);
+        
 
 
         this.canvas.addEventListener('click', function (event) {
@@ -291,6 +373,13 @@ var myGameArea = {
             else if (myGameArea.context.isPointInPath(GiveUp, event.offsetX, event.offsetY)) {
                 window.location.href = "game_is_over.html";
             }
+            else if (myGameArea.context.isPointInPath(Resume, event.offsetX, event.offsetY)) {
+                if (pause_game == true)
+                {
+                    pause_game = false;
+                    myGameArea.resume();
+                }
+            } 
             
 
         });
@@ -307,8 +396,11 @@ function everyinterval(n) {
 }
 function CheckIfDestroyed(obstacle) {
 
+    var levels = JSON.parse(window.localStorage.getItem('level'));
     var user = JSON.parse(window.localStorage.getItem('user'));
-    user['quest1'] = QuestKillMobs > 17 ? true : false;
+    var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
+    var nextIndex = levels.levels.indexOf(currentLevel) + 1;
+    user['quest1'] = QuestKillMobs > 17 && nextIndex - 1 == game_level.level ? true : false;
     localStorage.setItem("user", JSON.stringify(user));
 
 
@@ -444,8 +536,11 @@ function CheckIfDestroyed(obstacle) {
                 obstacle.vy = -500;
                 obstacle.width = -1;
                 obstacle.height = -1;
+                var levels = JSON.parse(window.localStorage.getItem('level'));
                 var user = JSON.parse(window.localStorage.getItem('user'));
-                user['quest1'] = QuestKillMobs > 17 ? true : false;
+                var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
+                var nextIndex = levels.levels.indexOf(currentLevel) + 1;
+                user['quest1'] = QuestKillMobs > 17 && nextIndex - 1 == game_level.level ? true : false;
                 localStorage.setItem("user", JSON.stringify(user));
                 
             }
@@ -462,6 +557,7 @@ document.addEventListener('keydown', function (e) {
     }
 })
 
+
 function updateGameArea() {
     var x, y;
     var weapon_id = 0;
@@ -473,6 +569,10 @@ function updateGameArea() {
             myGameArea.canvas.click();
         }
     }
+    
+    
+    
+    
     if (myGameArea.frameNo == 1 || everyinterval(current_level.enemy_respawn_frequency)) {
 
         x = myGameArea.canvas.width;
@@ -502,6 +602,7 @@ function updateGameArea() {
 
     }
 
+    
     if (QuestKillMobs == 20) {
             
 
@@ -511,7 +612,7 @@ function updateGameArea() {
             bossWeapon = [];
             
             myGameArea.clear();
-            myGameArea.stop();
+            //myGameArea.stop();
             
             Congrats();
     }
@@ -561,9 +662,13 @@ function updateGameArea() {
     }
 
 
+    //myBackground.newPos();
+    //myBackground.update();
+    //myGamePiece.onmousedown();
     myBackground.newPos();
     myBackground.update();
-    //myGamePiece.onmousedown();
+    myMobilePause.update();
+ 
     myGamePiece.newPos();
     myGamePiece.update();
 
@@ -611,6 +716,7 @@ function updateGameArea() {
 
     myHpScore.update();
     myTotalScore.update();
+    //myMobilePause.update();
     myBackground.speedY = 1;
 
 }
@@ -999,12 +1105,17 @@ function submiteForm() {
         difficulty: "youngling",
         quest1: false,
         quest2: false,
-        total: 0
+        total: 0,
+        music: false
+    }
+
+    const current_level = {
+        level: 0
     }
 
     if (nickname) {
         window.localStorage.setItem('user', JSON.stringify(newUser));
-        // location.replace("menu.html")
+        localStorage.setItem('current-level', JSON.stringify(current_level))
         window.location.href = "menu.html";
 
     }
@@ -1012,21 +1123,10 @@ function submiteForm() {
 
 function updateScore(die) {
     var user = JSON.parse(localStorage.getItem('user'));
-    // nickname = user['name']
     death = user['dies'];
     score = user['score'];
-    // back = user['background']
-    // level = user['difficulty']
-    // var newUser = {
-    //     name: nickname,
-    //     score: QuestKillMobs > score ? QuestKillMobs : score,
-    //     dies: death + die,
-    //     background: back,
-    //     difficulty: user['difficulty'],
-    //     quest1: user['quest1'],
-    //     quest2: user['quest2']
-    // }
     user['score'] = QuestKillMobs > score ? QuestKillMobs : score;
+    user['total'] += QuestKillMobs;
     user['dies'] = death + die;
     localStorage.setItem("user", JSON.stringify(user));
 }
@@ -1053,33 +1153,41 @@ function checkDifficulty() {
     }
 }
 
-
 function checkLevel() {
     var levelField = document.getElementById('level');
     var levels = JSON.parse(window.localStorage.getItem('level'));
     var user = JSON.parse(window.localStorage.getItem('user'));
-    // user['quest1'] = QuestKillMobs > 10 ? true : false;
+    var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
+    var nextIndex = levels.levels.indexOf(currentLevel) + 1;
 
-    levelField.textContent = user['difficulty'];
+    var game_level = JSON.parse(window.localStorage.getItem('current-level'));
+    levelField.textContent = levels.levels[game_level.level].difficulty;
 
-    if (user['quest1'] && user['quest2']) {
-        var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
-        var nextIndex = levels.levels.indexOf(currentLevel) + 1;
-        if (nextIndex <= 4) {
-            console.log(levels.levels[nextIndex]['difficulty']);
-            user['difficulty'] = levels.levels[nextIndex]['difficulty'];
-            user['quest1'] = false;
-            user['quest2'] = false;
-            localStorage.setItem("user", JSON.stringify(user));
-            document.getElementById('level').textContent = user['difficulty'];
-
-        }
-    }
-    if (user['quest1']) {
+    if (game_level.level < nextIndex - 1) {
         document.getElementById('quest-status1').textContent = "done";
-    }
-    if (user['quest2']) {
         document.getElementById('quest-status2').textContent = "done";
+    }
+
+    else {
+        if (user['quest1'] && user['quest2']) {
+            if (nextIndex <= 4) {
+                console.log(levels.levels[nextIndex]['difficulty']);
+                user['difficulty'] = levels.levels[nextIndex]['difficulty'];
+                user['quest1'] = false;
+                user['quest2'] = false;
+                localStorage.setItem("user", JSON.stringify(user));
+                // document.getElementById('level').textContent = user['difficulty'];
+
+            }
+        }
+        //console.log(nextIndex - 1)
+        //console.log(game_level.level)
+        if (user['quest1']) {
+            document.getElementById('quest-status1').textContent = "done";
+        }
+        if (user['quest2']) {
+            document.getElementById('quest-status2').textContent = "done";
+        }
     }
 }
 
