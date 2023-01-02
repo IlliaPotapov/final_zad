@@ -44,15 +44,7 @@ function PlayMusic(){
         audio.pause();
     }
 }
-function StopMusic()
-{
-    if (music_check['music'] == false) 
-    {
-        //console.log("yes");
-        audio.src = "";
-        audio.pause();
-    }
-}
+
     
 
 function detectMob() {
@@ -431,6 +423,7 @@ function CheckIfDestroyed(obstacle) {
                     obstacle.width = -1;
                     obstacle.height = -1;
                     updateScore();
+                    updateTotal();
                 }
 
 
@@ -461,6 +454,7 @@ function CheckIfDestroyed(obstacle) {
                     myBoss.Alive = false;
                     myBoss.Appeared = false;
                     updateScore();
+                    updateTotal();
                 }
 
             }
@@ -480,6 +474,8 @@ function CheckIfDestroyed(obstacle) {
                 obstacle.width = -1;
                 obstacle.height = -1;
                 updateScore();
+                updateTotal();
+                
                 
             }
         }
@@ -532,6 +528,7 @@ function CheckIfDestroyed(obstacle) {
             obstacle.hpChange();
             if (obstacle.hp <= 0) {
                 QuestKillMobs++;
+                updateTotal();
                 obstacle.vx = -500;
                 obstacle.vy = -500;
                 obstacle.width = -1;
@@ -605,7 +602,7 @@ function updateGameArea() {
     
     if (QuestKillMobs == 20) {
             
-
+            
             updateScore();
             myObstacles = [];
             Weapons = [[]];
@@ -1126,11 +1123,15 @@ function updateScore(die) {
     death = user['dies'];
     score = user['score'];
     user['score'] = QuestKillMobs > score ? QuestKillMobs : score;
-    user['total'] += QuestKillMobs;
+    
     user['dies'] = death + die;
     localStorage.setItem("user", JSON.stringify(user));
 }
-
+function updateTotal(){
+    var user = JSON.parse(localStorage.getItem('user'));
+    user['total'] += 1;
+    localStorage.setItem("user", JSON.stringify(user));
+}
 function checkBackground() {
     var body = document.getElementsByTagName('body')[0];
     user = JSON.parse(window.localStorage.getItem('user'));
