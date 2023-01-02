@@ -17,35 +17,33 @@ var MyIntreval = 20;
 var game_level = JSON.parse(window.localStorage.getItem('current-level'));
 var music_check = JSON.parse(window.localStorage.getItem('user'));
 var audio = new Audio("main_theme.mp3");
-
-
-function CheckMusic(){
-    if (music_check['music'] == true){
+var isplaying = false;
+function CheckMusic() {
+    if (music_check['music'] == true) {
         document.getElementById("music").checked = true;
     }
-    else{
+    else {
         document.getElementById("music").checked = false;
     }
 }
-function PlayMusic(){
-    
-    //console.log("hm");
-    
-    if (music_check['music'] == true) 
-    {
-        //console.log("yes");
+function PlayMusic() {
+
+    if (music_check['music'] == true) {
         audio.src = "main_theme.mp3";
         audio.play();
+
     }
-  
+
     else {
-        //console.log("no");
+
         audio.src = "";
         audio.pause();
+
+
     }
 }
 
-    
+
 
 function detectMob() {
     const toMatch = [
@@ -149,23 +147,23 @@ function startGyroscopeGame(x) {
 
 var current_level;
 function startGame(current_difficulty) {
-    //console.log(number_difficulty_chosen);
+
     game_level['level'] = current_difficulty;
     localStorage.setItem("current-level", JSON.stringify(game_level))
-    
-    //fetchLevels();
+
+
     myGameArea.start();
-    PlayMusic();
+
 
 
     // myMusic = new sound("http://soundfxcenter.com/movies/star-wars/8d82b5_Star_Wars_Main_Theme_Song.mp3");
     // myMusic.play();
 
-   
+
     level = JSON.parse(window.localStorage.getItem('level'));
 
     current_level = level.levels[number_difficulty_chosen];
-    //console.log(current_level.difficulty);
+
 
     myGamePiece = new ship("https://www.nicepng.com/png/full/36-365566_jedistarfighter-detail-star-wars-jedi-starfighter-top-view.png", "image");
 
@@ -177,7 +175,12 @@ function startGame(current_difficulty) {
     myHpScore = new info(innerWidth / 10, innerHeight / 8, "text");
     myMobilePause = new pauseButton(innerWidth / 10, innerHeight / 6, "text");
     myMobilePause.text = "Pause";
- 
+
+
+
+    PlayMusic();
+    
+
 }
 
 
@@ -195,7 +198,7 @@ function info(x, y, type) {
     }
 }
 
-  
+
 function pauseButton(x, y, type) {
     this.type = type;
     this.x = x;
@@ -205,18 +208,17 @@ function pauseButton(x, y, type) {
         const pauseMenu = new Path2D();
         if (this.type == "text") {
             ctx.fillStyle = "rgba(0, 0, 0, 0.819)";
-            if(!detectMob())
-            {
+            if (!detectMob()) {
 
-            
-            ctx.fillRect(this.x, this.y-15, this.x, this.y/5);
-            
-            pauseMenu.rect(this.x, this.y-15, this.x, this.y/5);
+
+                ctx.fillRect(this.x, this.y - 15, this.x, this.y / 5);
+
+                pauseMenu.rect(this.x, this.y - 15, this.x, this.y / 5);
             }
-            else{
-                ctx.fillRect(this.x, this.y-15, this.x*3, this.y/5);
-            
-                pauseMenu.rect(this.x, this.y-15, this.x*3, this.y/5);
+            else {
+                ctx.fillRect(this.x, this.y - 15, this.x * 3, this.y / 5);
+
+                pauseMenu.rect(this.x, this.y - 15, this.x * 3, this.y / 5);
             }
             ctx.font = "bold 16px Star Wars sans-serif";
             ctx.fillStyle = "#FFE81F";
@@ -225,22 +227,22 @@ function pauseButton(x, y, type) {
             ctx.fill(pauseMenu);
             myGameArea.canvas.addEventListener('touchstart', function (event) {
                 if (ctx.isPointInPath(pauseMenu, event.touches[0].screenX, event.touches[0].screenY)) {
-                    
+
                     pause();
                 }
             });
             myGameArea.canvas.addEventListener('mousedown', function (event) {
                 if (ctx.isPointInPath(pauseMenu, event.offsetX, event.offsetY)) {
-                    
-                    
+
+
                     pause();
                 }
             });
         }
 
     }
-    
-    
+
+
 }
 
 var myGameArea = {
@@ -249,30 +251,44 @@ var myGameArea = {
         this.canvas.width = innerWidth - 10;
         this.canvas.height = innerHeight - 10;
         this.context = this.canvas.getContext("2d");
+
+
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, MyIntreval);
         window.addEventListener('keydown', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
+            if (audio.paused) {
+                audio.play();
+            }
         });
         window.addEventListener('keyup', function (e) {
             myGameArea.keys[e.keyCode] = false;
+            if (audio.paused) {
+                audio.play();
+            }
         });
         window.addEventListener('space', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
+            if (audio.paused) {
+                audio.play();
+            }
         });
-      
 
 
         window.addEventListener('click', function (e) {
+            if (audio.paused) {
+                audio.play();
+            }
             blaster = new blast("https://www.pngarts.com/files/11/Green-Laser-PNG-Image.png", "image", myGamePiece.x, myGamePiece.y - 10);
             //myGamePiece.newPos();
             //myGamePiece.update();
             playerBlaster.push(blaster);
         });
-        
-           
+
+
         if (!detectMob()) {
             window.onmousedown = function (event) {
 
@@ -286,6 +302,9 @@ var myGameArea = {
 
                 function onMouseMove(event) {
                     moveAt(event.pageX, event.pageY);
+                    if (audio.paused) {
+                        audio.play();
+                    }
                 }
 
                 //  move the ship on mousemove
@@ -312,7 +331,7 @@ var myGameArea = {
                 //myGamePiece.newPos();
                 //myGamePiece.update();
             });
-            
+
         }
 
     },
@@ -327,7 +346,7 @@ var myGameArea = {
     },
 
     pauseMenu: function () {
-        
+
         this.context.fillStyle = "rgba(0, 0, 0, 0.819)";
         this.context.fillRect(this.canvas.width / 4, this.canvas.height / 4, this.canvas.width / 2, this.canvas.height / 2);
         this.context.fillStyle = "rgba(21, 21, 21, 21.819)";
@@ -353,7 +372,7 @@ var myGameArea = {
         this.context.fill(Menu);
         this.context.fill(GiveUp);
         this.context.fill(Resume);
-        
+
 
 
         this.canvas.addEventListener('click', function (event) {
@@ -366,13 +385,12 @@ var myGameArea = {
                 window.location.href = "game_is_over.html";
             }
             else if (myGameArea.context.isPointInPath(Resume, event.offsetX, event.offsetY)) {
-                if (pause_game == true)
-                {
+                if (pause_game == true) {
                     pause_game = false;
                     myGameArea.resume();
                 }
-            } 
-            
+            }
+
 
         });
 
@@ -417,7 +435,7 @@ function CheckIfDestroyed(obstacle) {
                     myObstacles[i].vy = -500;
                     myObstacles[i].width = -1;
                     myObstacles[i].height = -1;
-                   
+
                     obstacle.vx = -500;
                     obstacle.vy = -500;
                     obstacle.width = -1;
@@ -475,15 +493,15 @@ function CheckIfDestroyed(obstacle) {
                 obstacle.height = -1;
                 updateScore();
                 updateTotal();
-                
-                
+
+
             }
         }
         if (myGamePiece.hp <= 0) {
             updateScore(1);
             myGameArea.clear();
             myGameArea.stop();
-            
+
             for (i = 0; i < myObstacles.length; i++) {
                 myObstacles[i].vx = -500;
                 myObstacles[i].vy = -500;
@@ -539,7 +557,7 @@ function CheckIfDestroyed(obstacle) {
                 var nextIndex = levels.levels.indexOf(currentLevel) + 1;
                 user['quest1'] = QuestKillMobs > 17 && nextIndex - 1 == game_level.level ? true : false;
                 localStorage.setItem("user", JSON.stringify(user));
-                
+
             }
         }
 
@@ -566,10 +584,10 @@ function updateGameArea() {
             myGameArea.canvas.click();
         }
     }
-    
-    
-    
-    
+
+
+
+
     if (myGameArea.frameNo == 1 || everyinterval(current_level.enemy_respawn_frequency)) {
 
         x = myGameArea.canvas.width;
@@ -599,19 +617,19 @@ function updateGameArea() {
 
     }
 
-    
+
     if (QuestKillMobs == 20) {
-            
-            
-            updateScore();
-            myObstacles = [];
-            Weapons = [[]];
-            bossWeapon = [];
-            
-            myGameArea.clear();
-            //myGameArea.stop();
-            
-            Congrats();
+
+
+        updateScore();
+        myObstacles = [];
+        Weapons = [[]];
+        bossWeapon = [];
+
+        myGameArea.clear();
+        //myGameArea.stop();
+
+        Congrats();
     }
 
     if (QuestKillMobs == bossAppearKills && myBoss.Alive == false) {
@@ -665,7 +683,7 @@ function updateGameArea() {
     myBackground.newPos();
     myBackground.update();
     myMobilePause.update();
- 
+
     myGamePiece.newPos();
     myGamePiece.update();
 
@@ -851,16 +869,16 @@ function boss(width, height, url, x, y, type) {
     }
 
     this.hitBoundary = function () {
-        
+
         var boundaryright = myGameArea.canvas.width - this.width;
         var boundaryLeft = 0;
-     
+
         if (this.x <= boundaryLeft) {
-            
+
             this.direction = 1;
         }
         if (this.x >= boundaryright) {
-          
+
             this.direction = -1;
         }
     }
@@ -917,16 +935,16 @@ function enemy(width, height, url, x, y, type) {
     };
 
     this.hitBoundary = function () {
-       
+
         var boundaryright = myGameArea.canvas.width - this.width;
         var boundaryLeft = 0;
-        
+
         if (this.x <= boundaryLeft) {
-           
+
             this.direction = 1;
         }
         if (this.x >= boundaryright) {
-            
+
             this.direction = -1;
         }
     }
@@ -957,7 +975,7 @@ function ship(url, type) {
     }
 
     this.destroy = function () {
-        
+
         window.location.href = "game_is_over.html";
     }
     this.hpChange = function () {
@@ -1058,7 +1076,7 @@ function BackToMenu() {
 function GameIsOver() {
     window.location.href = "game_is_over.html";
 }
-function Congrats(){
+function Congrats() {
     window.location.href = "congratulations_game.html";
 }
 
@@ -1123,11 +1141,11 @@ function updateScore(die) {
     death = user['dies'];
     score = user['score'];
     user['score'] = QuestKillMobs > score ? QuestKillMobs : score;
-    
+
     user['dies'] = death + die;
     localStorage.setItem("user", JSON.stringify(user));
 }
-function updateTotal(){
+function updateTotal() {
     var user = JSON.parse(localStorage.getItem('user'));
     user['total'] += 1;
     localStorage.setItem("user", JSON.stringify(user));
