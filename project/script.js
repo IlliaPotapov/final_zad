@@ -17,7 +17,9 @@ var MyIntreval = 20;
 var game_level = JSON.parse(window.localStorage.getItem('current-level'));
 var music_check = JSON.parse(window.localStorage.getItem('user'));
 var audio = new Audio("main_theme.mp3");
-var isplaying = false;
+var blasterSound = new Audio("blaster.mp3")
+var blasterImperial = new Audio("blaster-imperial.mp3")
+
 function CheckMusic() {
     if (music_check['music'] == true) {
         document.getElementById("music").checked = true;
@@ -26,23 +28,33 @@ function CheckMusic() {
         document.getElementById("music").checked = false;
     }
 }
-function PlayMusic() {
 
-    if (music_check['music'] == true) {
-        audio.src = "main_theme.mp3";
-        audio.play();
-
+function CheckSound() {
+    if (music_check['sound'] == true) {
+        document.getElementById("sound").checked = true;
     }
-
     else {
-
-        audio.src = "";
-        audio.pause();
-
-
+        document.getElementById("sound").checked = false;
     }
 }
 
+function PlayMusic() {
+    if (music_check['music'] == true) {
+        audio.src = "main_theme.mp3";
+        audio.play();
+    }
+
+    else {
+        audio.src = "";
+        audio.pause();
+    }
+}
+function StopMusic() {
+    if (music_check['music'] == false) {
+        audio.src = "";
+        audio.pause();
+    }
+}
 
 
 function detectMob() {
@@ -114,7 +126,6 @@ function d5() {
 
 
 async function fetchLevels() {
-    console.log("asd");
     response = await fetch("levels.json");
 
     data = await response.json();
@@ -147,24 +158,11 @@ function startGyroscopeGame(x) {
 
 var current_level;
 function startGame(current_difficulty) {
-
     game_level['level'] = current_difficulty;
     localStorage.setItem("current-level", JSON.stringify(game_level))
-
-
     myGameArea.start();
-
-
-
-    // myMusic = new sound("http://soundfxcenter.com/movies/star-wars/8d82b5_Star_Wars_Main_Theme_Song.mp3");
-    // myMusic.play();
-
-
     level = JSON.parse(window.localStorage.getItem('level'));
-
     current_level = level.levels[number_difficulty_chosen];
-
-
     myGamePiece = new ship("https://www.nicepng.com/png/full/36-365566_jedistarfighter-detail-star-wars-jedi-starfighter-top-view.png", "image");
 
     user = JSON.parse(window.localStorage.getItem('user'));
@@ -176,10 +174,7 @@ function startGame(current_difficulty) {
     myMobilePause = new pauseButton(innerWidth / 10, innerHeight / 6, "text");
     myMobilePause.text = "Pause";
 
-
-
     PlayMusic();
-    
 
 }
 
@@ -245,47 +240,50 @@ function pauseButton(x, y, type) {
 
 }
 
+
 var myGameArea = {
     canvas: document.createElement("canvas"),
     start: function () {
         this.canvas.width = innerWidth - 10;
         this.canvas.height = innerHeight - 10;
         this.context = this.canvas.getContext("2d");
-
-
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, MyIntreval);
         window.addEventListener('keydown', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
             myGameArea.keys[e.keyCode] = true;
             if (audio.paused) {
-                audio.play();
+                PlayMusic()
             }
         });
         window.addEventListener('keyup', function (e) {
             myGameArea.keys[e.keyCode] = false;
             if (audio.paused) {
-                audio.play();
+                PlayMusic()
             }
         });
         window.addEventListener('space', function (e) {
             myGameArea.keys = (myGameArea.keys || []);
             if (audio.paused) {
-                audio.play();
+                PlayMusic()
             }
         });
 
 
+        // changes speed of shooting
+        var lastMove = 0;
         window.addEventListener('click', function (e) {
-            if (audio.paused) {
-                audio.play();
+            music_check
+            if (Date.now() - lastMove > 50) {
+                blaster = new blast("https://www.pngarts.com/files/11/Green-Laser-PNG-Image.png", "image", myGamePiece.x, myGamePiece.y - 10);
+                playerBlaster.push(blaster);
+                lastMove = Date.now();
+                if (music_check['sound']) {
+                    blasterSound.src = "blaster.mp3";
+                    blasterSound.play();
+                }
             }
-            blaster = new blast("https://www.pngarts.com/files/11/Green-Laser-PNG-Image.png", "image", myGamePiece.x, myGamePiece.y - 10);
-            //myGamePiece.newPos();
-            //myGamePiece.update();
-            playerBlaster.push(blaster);
         });
 
 
@@ -312,7 +310,6 @@ var myGameArea = {
 
                 // drop the ship, remove unneeded handlers
                 window.onmouseup = function () {
-                    //alert(pageX);
                     window.removeEventListener('mousemove', onMouseMove);
                     window.onmouseup = null;
                 };
@@ -328,8 +325,6 @@ var myGameArea = {
             window.addEventListener('touchmove', function (e) {
                 myGameArea.x = e.touches[0].screenX;
                 myGameArea.y = e.touches[0].screenY;
-                //myGamePiece.newPos();
-                //myGamePiece.update();
             });
 
         }
@@ -410,7 +405,8 @@ function CheckIfDestroyed(obstacle) {
     var user = JSON.parse(window.localStorage.getItem('user'));
     var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
     var nextIndex = levels.levels.indexOf(currentLevel) + 1;
-    user['quest1'] = QuestKillMobs > 17 && nextIndex - 1 == game_level.level ? true : false;
+    //quest for killing 
+    user['quest1'] = QuestKillMobs > 20 && nextIndex - 1 == game_level.level ? true : false;
     localStorage.setItem("user", JSON.stringify(user));
 
 
@@ -494,7 +490,6 @@ function CheckIfDestroyed(obstacle) {
                 updateScore();
                 updateTotal();
 
-
             }
         }
         if (myGamePiece.hp <= 0) {
@@ -517,7 +512,6 @@ function CheckIfDestroyed(obstacle) {
                 }
             }
             for (let i of bossWeapon) {
-
                 i.vx = -500;
                 i.vy = -500;
                 i.width = -1;
@@ -555,7 +549,8 @@ function CheckIfDestroyed(obstacle) {
                 var user = JSON.parse(window.localStorage.getItem('user'));
                 var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
                 var nextIndex = levels.levels.indexOf(currentLevel) + 1;
-                user['quest1'] = QuestKillMobs > 17 && nextIndex - 1 == game_level.level ? true : false;
+                //quest for killing
+                user['quest1'] = QuestKillMobs > 20 && nextIndex - 1 == game_level.level ? true : false;
                 localStorage.setItem("user", JSON.stringify(user));
 
             }
@@ -587,7 +582,6 @@ function updateGameArea() {
 
 
 
-
     if (myGameArea.frameNo == 1 || everyinterval(current_level.enemy_respawn_frequency)) {
 
         x = myGameArea.canvas.width;
@@ -602,6 +596,10 @@ function updateGameArea() {
             for (i = 0; i < myObstacles.length; i += 1) {
                 var weapon1 = new weapon(11, 11, myObstacles[i].x + 18, myObstacles[i].y + 40, 5, "https://t3.ftcdn.net/jpg/01/38/42/78/360_F_138427844_Aft7zkJlMICxCMNl5qYheOGX1PEhgSKg.jpg", "image");
                 Weapons[weapon_id].push(weapon1);
+                if (music_check['sound']) {
+                    blasterImperial.play()
+                }
+
             }
             weapon_id = myObstacles.length;
             bossWeapon = [];
@@ -610,6 +608,10 @@ function updateGameArea() {
             for (i = 0; i < 3; i += 1) {
                 var weapon2 = new weapon(20, 20, myBoss.x + 43 + (i * 22), myBoss.y + 250, 7, "images/gr_true.png", "image");
                 bossWeapon.push(weapon2);
+                if (music_check['sound']) {
+                    blasterImperial.play()
+                }
+
             }
 
         }
@@ -617,7 +619,7 @@ function updateGameArea() {
 
     }
 
-
+    //quest for killing
     if (QuestKillMobs == 20) {
 
 
@@ -675,11 +677,6 @@ function updateGameArea() {
         myGamePiece.x = myGameArea.x;
         myGamePiece.y = myGameArea.y;
     }
-
-
-    //myBackground.newPos();
-    //myBackground.update();
-    //myGamePiece.onmousedown();
     myBackground.newPos();
     myBackground.update();
     myMobilePause.update();
@@ -1099,12 +1096,10 @@ function pause() {
 function checkUser() {
     user = window.localStorage.getItem('user');
     if (user) {
-        // location.replace("menu.html")
         window.location.href = "menu.html";
 
     }
     else {
-        // location.replace("nickname.html")
         window.location.href = "nickname.html";
     }
 }
@@ -1121,7 +1116,8 @@ function submiteForm() {
         quest1: false,
         quest2: false,
         total: 0,
-        music: false
+        music: true,
+        sound: true
     }
 
     const current_level = {
@@ -1141,21 +1137,24 @@ function updateScore(die) {
     death = user['dies'];
     score = user['score'];
     user['score'] = QuestKillMobs > score ? QuestKillMobs : score;
-
+   
     user['dies'] = death + die;
     localStorage.setItem("user", JSON.stringify(user));
 }
+
 function updateTotal() {
     var user = JSON.parse(localStorage.getItem('user'));
     user['total'] += 1;
     localStorage.setItem("user", JSON.stringify(user));
 }
+
 function checkBackground() {
     var body = document.getElementsByTagName('body')[0];
     user = JSON.parse(window.localStorage.getItem('user'));
 
     body.style.backgroundImage = "url('" + user['background'] + "')";
 }
+
 
 function checkDifficulty() {
     var difficultyDiv = document.getElementById("difficulty-div").children;
@@ -1164,12 +1163,23 @@ function checkDifficulty() {
     for (level in levels.levels) {
         if (levels.levels[level]['difficulty'] == user['difficulty']) {
             for (let i = parseInt(level) + 1; i < levels.levels.length; i++) {
-                console.log(i);
                 difficultyDiv[i].href = "#";
             }
             break;
         }
     }
+}
+
+function levelUp() {
+    var levels = JSON.parse(window.localStorage.getItem('level'));
+    var user = JSON.parse(window.localStorage.getItem('user'));
+    var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
+    var nextIndex = levels.levels.indexOf(currentLevel) + 1;
+
+    user['difficulty'] = levels.levels[nextIndex]['difficulty'];
+    user['quest1'] = false;
+    user['quest2'] = false;
+    localStorage.setItem("user", JSON.stringify(user));
 }
 
 function checkLevel() {
@@ -1178,10 +1188,7 @@ function checkLevel() {
     var user = JSON.parse(window.localStorage.getItem('user'));
     var currentLevel = levels.levels.find(level => level['difficulty'] == user['difficulty']);
     var nextIndex = levels.levels.indexOf(currentLevel) + 1;
-
-    var game_level = JSON.parse(window.localStorage.getItem('current-level'));
     levelField.textContent = levels.levels[game_level.level].difficulty;
-
     if (game_level.level < nextIndex - 1) {
         document.getElementById('quest-status1').textContent = "done";
         document.getElementById('quest-status2').textContent = "done";
@@ -1190,17 +1197,12 @@ function checkLevel() {
     else {
         if (user['quest1'] && user['quest2']) {
             if (nextIndex <= 4) {
-                console.log(levels.levels[nextIndex]['difficulty']);
                 user['difficulty'] = levels.levels[nextIndex]['difficulty'];
                 user['quest1'] = false;
                 user['quest2'] = false;
                 localStorage.setItem("user", JSON.stringify(user));
-                // document.getElementById('level').textContent = user['difficulty'];
-
             }
         }
-        //console.log(nextIndex - 1)
-        //console.log(game_level.level)
         if (user['quest1']) {
             document.getElementById('quest-status1').textContent = "done";
         }

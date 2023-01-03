@@ -17,7 +17,6 @@
             "enemy_speed_vy": 1,
             "enemy_speed_vx": 3.5,
             "enemy_respawn_frequency": 125
-            
         },
         {
             "difficulty": "knight",
@@ -46,7 +45,5 @@
             "enemy_speed_vx": 4.5,
             "enemy_respawn_frequency": 50
         }
-        
-        
     ]
-    }
+}

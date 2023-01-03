@@ -1,6 +1,4 @@
 function changeBackground(element) {
-    // // document.body.style.backgroundImage = "url('" + element.src + "')";
-    // // console.log(element.src)
     var body = document.getElementsByTagName('body')[0];
     body.style.backgroundImage = "url('" + element.src + "')";
 
@@ -15,9 +13,6 @@ function changeBackground(element) {
         quest2: change_user['quest2'],
         total: change_user['total'],
         music: change_user['music']
-        
     }
     window.localStorage.setItem('user', JSON.stringify(newUser));
-
-
 }

@@ -1,4 +1,4 @@
-function SetMusic(x) {
+function SetSound(x) {
 
     change_user = JSON.parse(window.localStorage.getItem('user'));
     const newUser = {
@@ -10,8 +10,8 @@ function SetMusic(x) {
         quest1: change_user['quest1'],
         quest2: change_user['quest2'],
         total: change_user['total'],
-        sound: change_user['sound'],
-        music: x.checked
+        music: change_user['music'],
+        sound: x.checked,
 
     }
     window.localStorage.setItem('user', JSON.stringify(newUser));
