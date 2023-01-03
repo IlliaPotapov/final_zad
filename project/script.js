@@ -163,7 +163,7 @@ function startGame(current_difficulty) {
     myGameArea.start();
     level = JSON.parse(window.localStorage.getItem('level'));
     current_level = level.levels[number_difficulty_chosen];
-    myGamePiece = new ship("https://www.nicepng.com/png/full/36-365566_jedistarfighter-detail-star-wars-jedi-starfighter-top-view.png", "image");
+    myGamePiece = new ship("images/ship.png", "image");
 
     user = JSON.parse(window.localStorage.getItem('user'));
     myBackground = new background(innerWidth - 10, innerHeight - 10, user['background'], 0, 0, "background");
@@ -276,7 +276,7 @@ var myGameArea = {
         window.addEventListener('click', function (e) {
             music_check
             if (Date.now() - lastMove > 50) {
-                blaster = new blast("https://www.pngarts.com/files/11/Green-Laser-PNG-Image.png", "image", myGamePiece.x, myGamePiece.y - 10);
+                blaster = new blast("images/ship_blaster", "image", myGamePiece.x, myGamePiece.y - 10);
                 playerBlaster.push(blaster);
                 lastMove = Date.now();
                 if (music_check['sound']) {
@@ -590,11 +590,11 @@ function updateGameArea() {
         height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
 
         if (QuestKillMobs < bossAppearKills || QuestKillMobs > bossAppearKills) {
-            var Enemy = new enemy(45, 45, "https://pngimg.com/uploads/starwars/starwars_PNG53.png", 100, 100, "image");
+            var Enemy = new enemy(45, 45, "images/enemy.png", 100, 100, "image");
             myObstacles.push(Enemy);
 
             for (i = 0; i < myObstacles.length; i += 1) {
-                var weapon1 = new weapon(11, 11, myObstacles[i].x + 18, myObstacles[i].y + 40, 5, "https://t3.ftcdn.net/jpg/01/38/42/78/360_F_138427844_Aft7zkJlMICxCMNl5qYheOGX1PEhgSKg.jpg", "image");
+                var weapon1 = new weapon(11, 11, myObstacles[i].x + 18, myObstacles[i].y + 40, 5, "images/weapon_enemy_lasers.jpg", "image");
                 Weapons[weapon_id].push(weapon1);
                 if (music_check['sound']) {
                     blasterImperial.play()
